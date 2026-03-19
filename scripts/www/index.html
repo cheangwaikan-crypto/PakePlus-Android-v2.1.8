@@ -1,11 +1,1261 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>PakePlus</title>
-    </head>
-    <body>
-        PakePlus
-    </body>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>股票記錄系統 v1.3</title>
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', 'Microsoft JhengHei', -apple-system, sans-serif;
+    }
+
+    body {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 11px;
+        min-height: 100vh;
+        width: 100%;
+    }
+
+    .container {
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+        background: transparent;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 0;
+        min-height: 100vh;
+    }
+
+    .header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding:2px 8px 0 8px;
+    }
+
+    h1 {
+        font-size: 1.4rem;
+        color: #13293D;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .header-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .header-buttons button {
+        border: none;
+        border-radius: 5px;
+        padding: 6px 8px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        cursor: pointer;
+    }
+
+    #saveBtn { background: #27ae60; color: white; }
+    #loadBtn { background: #f39c12; color: white; }
+
+    .market-toggle-group {
+        display: flex;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        justify-content: flex-start;
+    }
+    .market-pill {
+        background: white;
+        border: 1px solid #d9e2ef;
+        border-radius: 5px;
+        padding: 4px 6px;
+        font-weight: 600;
+        color: #1e3a5f;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        transition: all 0.2s;
+    }
+    .market-pill.active {
+        background: #163A5F;
+        color: white;
+        border-color: #163A5F;
+        box-shadow: 0 4px 8px rgba(22,58,95,0.2);
+    }
+    .market-pill.active span { color: white; }
+    .market-pill:hover {
+        background: #f0f4fa;
+        border-color: #27ae60;
+    }
+    .market-pill.active:hover {
+        background: #1f4a77;
+    }
+    .market-pill.closed-tab {
+        border-color: #7f8c8d;
+        background: #ecf0f1;
+        color: #2c3e50;
+    }
+    .market-pill.closed-tab.active {
+        background: #546e7a;
+        color: white;
+        border-color: #37474f;
+    }
+
+    .group-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 5px;
+        margin-bottom: 0px;
+        padding: 0 8px;
+    }
+
+    .group-tab {
+        background: white;
+        border: 1px solid #d9e2ef;
+        border-radius: 5px;
+        padding: 4px 12px;
+        font-weight: 500;
+        color: #1e3a5f;
+        cursor: pointer;
+        font-size: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+    }
+
+    .group-tab.active {
+        background: #163A5F;
+        color: white;
+        border-color: #163A5F;
+    }
+
+    .group-tab .badge {
+        background: #eef2f6;
+        color: #1e3a5f;
+        border-radius: 5px;
+        padding: 1px 5px;
+        font-size: 0.6rem;
+        font-weight: 600;
+    }
+
+    .active .badge {
+        background: rgba(255,255,255,0.2);
+        color: white;
+    }
+
+    .group-stats-panel {
+        background: #f8f9fa;
+        color: #2c3e50;
+        border-radius: 5px;
+        padding: 12px;
+        margin: 0 0px 14px 0px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        box-shadow: none;
+    }
+
+    .stats-row {
+        display: flex;
+        width: 100%;
+        gap: 8px;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        text-align: center;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+        color: #666;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+.stat-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.positive-num {
+    color: #27ae60;
+    font-size: 0.9rem;        
+        font-weight: 700; 
+}
+
+.negative-num {
+    color: #e74c3c;
+    font-size: 0.9rem;     
+        font-weight: 700; 
+}
+#statTotalCost {
+    font-size: 0.9rem;        
+        font-weight: 700; 
+}
+    .price-update-area {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        background: #f0f2f5;
+        padding: 8px 12px;
+        border-radius: 10px;
+        width: 100%;
+    }
+
+    .price-update-area input {
+        background: white;
+        border: 1px solid #e0e4e9;
+        border-radius: 5px;
+        padding: 6px 10px;
+        flex: 1;
+        font-size: 0.85rem;
+        text-align: center;
+    }
+
+    .update-price-btn {
+        background: #2dc747;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 6px 16px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .update-price-btn:hover {
+        background: #25a83a;
+    }
+
+    .form-toggle {
+        background: #ffffff;
+        border: 1px solid #d0ddee;
+        border-radius: 5px 5px 0 0;
+        padding: 8px 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        margin: 12px 0 0 0 ;
+        border-bottom: 1px solid #d0ddee;
+    }
+
+    .form-toggle span {
+        color: #000000;
+        font-weight: 600;
+    }
+
+    .toggle-icon {
+        color: #2c3e50;
+        transition: transform 0.3s;
+    }
+
+    .toggle-icon.rotated {
+        transform: rotate(180deg);
+    }
+
+    .form-container {
+        background: #f9fcff;
+        border-radius: 0 0 5px 5px;
+        border-left: 1px solid #d0ddee;
+        border-right: 1px solid #d0ddee;
+        border-bottom: 0px solid #d0ddee;
+        border-top: none;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        margin: -10px 0 0 0;
+    }
+
+    .form-container.expanded {
+        max-height: 300px;
+        padding: 16px 12px;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+
+    .form-group {
+        flex: 1 1 110px;
+    }
+
+    label {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.7rem;
+        margin-bottom: 2px;
+        display: block;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #e0e4e9;
+        border-radius: 5px;
+        background: white;
+        font-size: 0.85rem;
+        color: #2c3e50;
+        transition: all 0.2s;
+    }
+
+    input:focus, select:focus {
+        outline: none;
+        border-color: #27ae60;
+        box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    button {
+        border: none;
+        border-radius: 5px;
+        padding: 8px 16px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+    }
+
+    .mobile-stock-list {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        margin-top: 2px;
+        padding: 0;
+    }
+
+    .stock-card {
+        background: white;
+        border-radius: 5px;
+        border: 1px solid #e6ecf5;
+        padding: 8px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+        transition: background 0.1s;
+
+    }
+
+    .stock-card.negative-shares {
+        background: #eeedc5 !important;
+        border-color: #bdc3cf;
+        opacity: 0.9;
+    }
+    /* 股息紅利卡片特殊底色 */
+    .stock-card.dividend-card {
+        background: #e3f2fd !important;
+        border-color: #90caf9;
+    }
+
+    .grid-row {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr 1.2fr 1.2fr 0.3fr;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 2px;
+    }
+
+    .grid-cell {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .index-cell {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        min-height: 32px;
+    }
+
+    .index-cell .index-number {
+        display: inline-flex;
+        background: #163A5F;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .label-text {
+        font-size: 0.7rem;
+        color: #000000;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .value-text {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #1e2b3a;
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .value-positive { color: #27ae60; }
+    .value-negative { color: #e74c3c; }
+
+    .btn-inline {
+        border: none;
+        border-radius: 5px;
+        padding: 4px 0;
+        font-size: 0.7rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
+    }
+
+    .edit-btn { background: #30649b; color: white; }
+    .delete-btn { background: #c14a5a; color: white; }
+
+    .edit-btn:hover { background: #2a5580; }
+    .delete-btn:hover { background: #a83e4b; }
+
+    #addBtn {
+        background: #27ae60;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 8px 24px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.85rem;
+        box-shadow: 0 2px 6px rgba(39, 174, 96, 0.2);
+    }
+
+    #addBtn:hover {
+        background: #219955;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+    }
+
+    #updateBtn {
+        background: #30649b;
+        color: white;
+    }
+
+    #cancelBtn {
+        background: #95a5a6;
+        color: white;
+    }
+
+    .footer-summary {
+        width: 95%;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        background: #2c3e50;
+        color: white;
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-top: 16px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        gap: 10px;
+    }
+    .footer-item {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .footer-label {
+        opacity: 0.7;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+    }
+    .footer-value {
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+    .footer-fee {
+        font-size: 0.6rem;
+        color: #ffd966;
+        margin-left: 5px;
+    }
+    .footer-hk, .footer-us { color: #ffd966; }
+    .footer-total { color: #ffffff; }
+
+    .desktop-table { display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header-row">
+        <div class="market-toggle-group" style="margin:0; padding:0;">
+            <button id="marketHKBtn" class="market-pill active" data-market="HK">🇭🇰 港股</button>
+            <button id="marketUSBtn" class="market-pill" data-market="US">🇺🇸 美股</button>
+            <button id="marketClosedBtn" class="market-pill closed-tab" data-market="CLOSED">📦 已清倉</button>
+        </div>
+        <div class="header-buttons">
+            <button id="saveBtn">導出</button>
+            <button id="loadBtn">導入</button>
+            <input type="file" id="fileInput" accept=".json" style="display:none;">
+        </div>
+    </div>
+
+    <div class="group-bar" id="groupTabs"></div>
+
+    <div class="group-stats-panel" id="groupStatsPanel" style="display: none; background: #FFFFFF; border-radius: 5px; padding: 12px; margin-bottom: 2px;">
+        <div class="stats-row" style="display: flex; width: 100%; gap: 8px; justify-content: space-between;">
+            <div class="stat-item"><span class="stat-label">總盈虧</span><span class="stat-value" id="statTotalProfit">$0</span></div>
+            <div class="stat-item"><span class="stat-label">百分比</span><span class="stat-value" id="statTotalDrop">0%</span></div>
+            <div class="stat-item"><span class="stat-label">總股數</span><span class="stat-value" id="statTotalShares">0</span></div>
+            <div class="stat-item"><span class="stat-label">總成本</span><span class="stat-value" id="statTotalCost">$0</span></div>
+        </div>
+        
+        <div class="price-update-area" style="width: 100%; margin-top: 2px; display: flex; gap: 8px; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.05); padding: 4px 12px; border-radius: 5px;">
+                <span style="font-size: 0.7rem; opacity: 0.8;">平均成本</span>
+                <span style="font-size: 1rem; font-weight: 700;" id="avgCostDisplay">$0</span>
+            </div>
+            <div style="display: flex; gap: 4px; flex: 1;">
+                <input type="number" id="groupCurrentPrice" step="0.001" placeholder="當前價" style="flex: 1;">
+                <button class="update-price-btn" id="updateGroupPriceBtn">更新</button>
+            </div>
+        </div>
+
+        <div class="form-toggle" id="formToggle">
+            <span style="font-weight:600;">➕ 新增記錄</span>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="form-container" id="formContainer">
+            <form id="stockForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>股票代碼</label>
+                        <select id="stockCodeSelect" required>
+                            <option value="">選擇或輸入新代碼</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>買入價/賣出價(負數為股息)</label>
+                        <input type="number" id="purchasePrice" step="0.001" required>
+                    </div>
+                    <div class="form-group">
+                        <label>股數（賣出請用負數）</label>
+                        <input type="number" id="shares" step="1" required>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button type="button" id="addBtn">✅ 加入</button>
+                    <button type="button" id="updateBtn" style="display:none;">🔄 更新</button>
+                    <button type="button" id="cancelBtn" style="display:none;">✖️ 取消</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="mobile-stock-list" id="mobileStockList"></div>
+    </div>
+
+    <!-- 底部總計：全部成本 / 持倉總金額 / 總虧損 + 手續費總筆數與總額 -->
+    <div class="footer-summary" id="footerSummary">
+        <div class="footer-item"><span class="footer-label">📉 全部成本 (港元)</span><span class="footer-value" id="footerTotalCost">$0</span></div>
+        <div class="footer-item"><span class="footer-label">💹 持倉總金額 (港元)</span><span class="footer-value" id="footerTotalValue">$0</span></div>
+        <div class="footer-item"><span class="footer-label">💰 總盈虧 (港元) </span><span class="footer-value" id="footerTotalProfit">$0</span><span class="footer-fee" id="footerFeeInfo">(手續費 0筆 / $0)</span></div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        let stocks = [];
+        let groupPriceMap = {};
+        let availableCodes = new Set();
+
+        let currentMarket = 'HK';    // 'HK' 或 'US' 或 'CLOSED'
+        let activeGroup = null;      
+
+        // DOM
+        const marketHKBtn = document.getElementById('marketHKBtn');
+        const marketUSBtn = document.getElementById('marketUSBtn');
+        const marketClosedBtn = document.getElementById('marketClosedBtn');
+        const groupTabs = document.getElementById('groupTabs');
+        const groupStatsPanel = document.getElementById('groupStatsPanel');
+        const statTotalShares = document.getElementById('statTotalShares');
+        const statTotalCost = document.getElementById('statTotalCost');
+        const statTotalDrop = document.getElementById('statTotalDrop');
+        const statTotalProfit = document.getElementById('statTotalProfit');
+        const groupCurrentPrice = document.getElementById('groupCurrentPrice');
+        const updateGroupPriceBtn = document.getElementById('updateGroupPriceBtn');
+        const mobileList = document.getElementById('mobileStockList');
+        const stockCodeSelect = document.getElementById('stockCodeSelect');
+        const purchaseInput = document.getElementById('purchasePrice');
+        const sharesInput = document.getElementById('shares');
+        const addBtn = document.getElementById('addBtn');
+        const updateBtn = document.getElementById('updateBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const formToggle = document.getElementById('formToggle');
+        const formContainer = document.getElementById('formContainer');
+        const toggleIcon = document.querySelector('.toggle-icon');
+
+        const footerTotalCost = document.getElementById('footerTotalCost');
+        const footerTotalValue = document.getElementById('footerTotalValue');
+        const footerTotalProfit = document.getElementById('footerTotalProfit');
+        const footerFeeInfo = document.getElementById('footerFeeInfo');
+
+        const USD_TO_HKD = 7.8;
+        const FEE_HK = 40;
+        const FEE_US = 25;
+
+        // 判斷是否為股息記錄 (買入價為負數且股數==0)
+        function isDividendRecord(stock) {
+            return stock.purchasePrice < 0 && stock.shares === 0;
+        }
+
+        // 判斷股票類別
+        function getMarketFromCode(code) {
+            if (!code) return 'HK';
+            if (/^[A-Za-z.]+$/.test(code)) return 'US';
+            return 'HK';
+        }
+
+        function getNetSharesForCode(code) {
+            return stocks.filter(s => s.code === code && !isDividendRecord(s)).reduce((sum, s) => sum + s.shares, 0);
+        }
+
+        function filterStocksByMarket(market) {
+            if (market === 'CLOSED') {
+                const codesWithNetZero = new Set();
+                stocks.forEach(s => codesWithNetZero.add(s.code));
+                const zeroCodes = Array.from(codesWithNetZero).filter(code => getNetSharesForCode(code) === 0);
+                return stocks.filter(s => zeroCodes.includes(s.code));
+            } else {
+                const codesInMarket = new Set();
+                stocks.forEach(s => {
+                    if (getMarketFromCode(s.code) === market && getNetSharesForCode(s.code) !== 0) codesInMarket.add(s.code);
+                });
+                return stocks.filter(s => codesInMarket.has(s.code));
+            }
+        }
+
+        function getCodesByCurrentMarket() {
+            if (currentMarket === 'CLOSED') {
+                const codesWithNetZero = new Set();
+                stocks.forEach(s => codesWithNetZero.add(s.code));
+                return Array.from(codesWithNetZero).filter(code => getNetSharesForCode(code) === 0).sort();
+            } else {
+                const codesSet = new Set();
+                stocks.forEach(s => {
+                    if (getMarketFromCode(s.code) === currentMarket && getNetSharesForCode(s.code) !== 0) codesSet.add(s.code);
+                });
+                return Array.from(codesSet).sort();
+            }
+        }
+
+        function updateMarketButtons() {
+            marketHKBtn.classList.remove('active');
+            marketUSBtn.classList.remove('active');
+            marketClosedBtn.classList.remove('active');
+            if (currentMarket === 'HK') marketHKBtn.classList.add('active');
+            else if (currentMarket === 'US') marketUSBtn.classList.add('active');
+            else if (currentMarket === 'CLOSED') marketClosedBtn.classList.add('active');
+        }
+
+        function renderGroups() {
+            const codesInMarket = getCodesByCurrentMarket();
+            if (!codesInMarket.includes(activeGroup)) {
+                activeGroup = codesInMarket.length > 0 ? codesInMarket[0] : null;
+            }
+
+            groupTabs.innerHTML = codesInMarket.map(code => {
+                const count = stocks.filter(s => s.code === code).length;
+                const activeClass = activeGroup === code ? 'active' : '';
+                return `<span class="group-tab ${activeClass}" data-group="${code}">${code}<span class="badge">${count}</span></span>`;
+            }).join('');
+            
+            document.querySelectorAll('.group-tab[data-group]').forEach(tab => {
+                tab.addEventListener('click', e => {
+                    activeGroup = e.target.closest('.group-tab').dataset.group;
+                    renderGroups();
+                    updateGroupStatsAndPrice();
+                    renderMobileList();
+                });
+            });
+
+            updateMarketButtons();
+        }
+
+        function getCurrentPrice(stock) {
+            return groupPriceMap[stock.code] || 0;
+        }
+        function totalCost(stock) {
+            return stock.purchasePrice * stock.shares;
+        }
+        function currentValue(stock) {
+            return getCurrentPrice(stock) * stock.shares;
+        }
+        function profit(stock) {
+            if (isDividendRecord(stock)) {
+                // 股息視為直接盈虧 (正數增加盈虧，負數扣減)
+                return -stock.purchasePrice; // 因為 purchasePrice 為負數，所以負負得正；例如 -5 代表收到5元現金，增加盈虧 +5
+            }
+            return currentValue(stock) - totalCost(stock);
+        }
+
+        function updateCodeSelect() {
+            const cur = stockCodeSelect.value;
+            stockCodeSelect.innerHTML = '<option value="">選擇股票代碼</option>';
+            Array.from(availableCodes).sort().forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                stockCodeSelect.appendChild(opt);
+            });
+            if (availableCodes.has(cur)) {
+                stockCodeSelect.value = cur;
+            } else {
+                stockCodeSelect.value = '';
+            }
+        }
+
+        function ensureCodeInSet(code) {
+            if (!code) return;
+            if (!availableCodes.has(code)) {
+                availableCodes.add(code);
+                updateCodeSelect();
+            }
+        }
+
+        function updateGroupStatsAndPrice() {
+            if (!activeGroup) {
+                groupStatsPanel.style.display = 'none';
+                return;
+            }
+            const groupStocks = stocks.filter(s => s.code === activeGroup);
+            if (groupStocks.length === 0) {
+                groupStatsPanel.style.display = 'none';
+                return;
+            }
+            groupStatsPanel.style.display = 'flex';
+
+            // 統計時股息不影響股數、平均成本；但盈虧應包含股息
+            const nonDivStocks = groupStocks.filter(s => !isDividendRecord(s));
+            const divStocks = groupStocks.filter(s => isDividendRecord(s));
+
+            const totalShares = nonDivStocks.reduce((acc, s) => acc + s.shares, 0);
+            const totalCostVal = nonDivStocks.reduce((acc, s) => acc + totalCost(s), 0);
+            const totalValue = nonDivStocks.reduce((acc, s) => acc + currentValue(s), 0);
+            const totalDivProfit = divStocks.reduce((acc, s) => acc + profit(s), 0);
+            const totalProfitVal = (totalValue - totalCostVal) + totalDivProfit;
+            const avgDrop = totalCostVal > 0 ? ((totalValue / totalCostVal - 1) * 100) : 0;
+
+            statTotalShares.innerText = totalShares.toFixed(0);
+            statTotalCost.innerText = '$' + totalCostVal.toFixed(0);
+            statTotalDrop.innerText = avgDrop.toFixed(2) + '%';
+            statTotalProfit.innerText = '$' + totalProfitVal.toFixed(0);
+
+            statTotalCost.className = '';
+            statTotalDrop.className = avgDrop >= 0 ? 'positive-num' : 'negative-num';
+            statTotalProfit.className = totalProfitVal >= 0 ? 'positive-num' : 'negative-num';
+
+            groupCurrentPrice.value = groupPriceMap[activeGroup] || 0;
+
+            const totalSharesForAvg = nonDivStocks.reduce((acc, s) => acc + s.shares, 0);
+            const totalCostForAvg = nonDivStocks.reduce((acc, s) => acc + (s.purchasePrice * s.shares), 0);
+            const avgCost = totalSharesForAvg > 0 ? totalCostForAvg / totalSharesForAvg : 0;
+
+            const avgCostDisplay = document.getElementById('avgCostDisplay');
+            if (avgCostDisplay) {
+                avgCostDisplay.innerText = '$' + avgCost.toFixed(3);
+            }
+        }
+
+        updateGroupPriceBtn.addEventListener('click', () => {
+            if (!activeGroup) return alert('請先選擇分組');
+            const newPrice = parseFloat(groupCurrentPrice.value);
+            if (isNaN(newPrice) || newPrice < 0) return alert('請輸入有效價格');
+            groupPriceMap[activeGroup] = newPrice;
+            updateGroupStatsAndPrice();
+            renderMobileList();
+            updateFooterSummary();   
+            saveLocal();
+        });
+
+        function renderMobileList() {
+            let filtered = activeGroup ? stocks.filter(s => s.code === activeGroup) : [];
+            const reversed = [...filtered].reverse();
+            
+            mobileList.innerHTML = '';
+            reversed.forEach((s, idx) => {
+                const totalCount = filtered.length;
+                const displayIndex = totalCount - idx;
+                
+                const isDiv = isDividendRecord(s);
+                const curr = isDiv ? 0 : getCurrentPrice(s);
+                const cost = isDiv ? 0 : totalCost(s);
+                const val = isDiv ? 0 : currentValue(s);
+                const prof = profit(s);
+                const profPct = (!isDiv && curr && s.purchasePrice) ? ((curr - s.purchasePrice) / s.purchasePrice * 100).toFixed(2) : '';
+                const globalIndex = stocks.indexOf(s);
+                
+                const priceLabel = isDiv ? '股息' : (s.shares < 0 ? '賣出價' : '入市價');
+
+                const card = document.createElement('div');
+                card.className = `stock-card ${isDiv ? 'dividend-card' : (s.shares < 0 ? 'negative-shares' : '')}`;
+                
+                // 股息卡: 升跌、盈虧顯示特殊
+                let pctDisplay = '-';
+                let profitDisplay = `+$${prof.toFixed(2)}`; // 股息 profit 已為正收益
+                let profitClass = 'value-positive';
+                if (isDiv) {
+                    pctDisplay = '💰';
+                } else {
+                    profitDisplay = prof >= 0 ? '+' + prof.toFixed(0) : prof.toFixed(0);
+                    profitClass = prof > 0 ? 'value-positive' : (prof < 0 ? 'value-negative' : '');
+                    pctDisplay = (profPct !== '' && !isDiv) ? (profPct >= 0 ? '▲' + ' ' + profPct + '%' : '▼' + ' ' + Math.abs(profPct) + '%') : '-';
+                }
+
+                card.innerHTML = `
+                    <div class="grid-row">
+                        <div class="grid-cell index-cell" style="text-align: left !important; padding-left: 1px !important;">
+                            <div class="index-number">${displayIndex}</div>
+                        </div>
+                        <div class="grid-cell">
+                            <div class="label-text">現價</div>
+                            <div class="value-text">${isDiv ? '-' : '$'+curr.toFixed(2)}</div>
+                        </div>
+                        <div class="grid-cell">
+                            <div class="label-text">升跌</div>
+                            <div class="value-text ${isDiv ? '' : (profPct>0?'value-positive':'value-negative')}">${pctDisplay}</div>
+                        </div>
+                        <div class="grid-cell">
+                            <div class="label-text">盈虧</div>
+                            <div class="value-text ${profitClass}">${profitDisplay}</div>
+                        </div>
+                        <div class="grid-cell">
+                            <button class="btn-inline edit-btn" data-index="${globalIndex}">修改</button>
+                        </div>
+                    </div>
+                    <div class="grid-row">
+                        <div class="grid-cell">
+                            <div class="label-text">${priceLabel}</div>
+                            <div class="value-text">${isDiv ? '$'+(-s.purchasePrice).toFixed(2) : '$'+s.purchasePrice.toFixed(2)}</div>
+                        </div>
+                        <div class="grid-cell">
+                            <div class="label-text">數量</div>
+                            <div class="value-text">${isDiv ? '-' : s.shares}</div>
+                        </div>
+                        <div class="grid-cell">
+                            <div class="label-text">成本</div>
+                            <div class="value-text">${isDiv ? '-' : '$'+cost.toFixed(0)}</div>
+                        </div>
+                        <div class="grid-cell">
+                            <div class="label-text">市值</div>
+                            <div class="value-text">${(isDiv || s.shares < 0) ? '-' : '$'+val.toFixed(0)}</div>
+                        </div>
+                        <div class="grid-cell">
+                            <button class="btn-inline delete-btn" data-index="${globalIndex}">刪除</button>
+                        </div>
+                    </div>
+                `;
+                mobileList.appendChild(card);
+            });
+
+            document.querySelectorAll('.edit-btn').forEach(b => {
+                b.addEventListener('click', e => {
+                    e.stopPropagation();
+                    editStock(parseInt(e.target.dataset.index));
+                });
+            });
+            document.querySelectorAll('.delete-btn').forEach(b => {
+                b.addEventListener('click', e => {
+                    e.stopPropagation();
+                    if (confirm('刪除此筆記錄？')) {
+                        const idx = parseInt(e.target.dataset.index);
+                        const removed = stocks[idx];
+                        stocks.splice(idx, 1);
+                        if (!stocks.some(s => s.code === removed.code)) {
+                            availableCodes.delete(removed.code);
+                        }
+                        if (getCodesByCurrentMarket().length === 0) {
+                            activeGroup = null;
+                        } else if (!getCodesByCurrentMarket().includes(activeGroup)) {
+                            activeGroup = getCodesByCurrentMarket()[0] || null;
+                        }
+                        updateCodeSelect();
+                        renderGroups();
+                        updateGroupStatsAndPrice();
+                        renderMobileList();
+                        updateFooterSummary();
+                        saveLocal();
+                    }
+                });
+            });
+            updateFooterSummary(); 
+        }
+
+        function editStock(index) {
+            const s = stocks[index];
+            ensureCodeInSet(s.code);
+            stockCodeSelect.value = s.code;
+            purchaseInput.value = s.purchasePrice;
+            sharesInput.value = s.shares;
+            editingIndex = index;
+            addBtn.style.display = 'none';
+            updateBtn.style.display = 'inline-block';
+            cancelBtn.style.display = 'inline-block';
+            formContainer.classList.add('expanded');
+            toggleIcon.classList.add('rotated');
+        }
+
+        let editingIndex = -1;
+        function resetForm() {
+            stockCodeSelect.value = '';
+            purchaseInput.value = '';
+            sharesInput.value = '';
+            editingIndex = -1;
+            addBtn.style.display = 'inline-block';
+            updateBtn.style.display = 'none';
+            cancelBtn.style.display = 'none';
+        }
+
+        function addOrUpdate() {
+            let code = stockCodeSelect.value.trim();
+            if (!code) {
+                code = prompt('輸入股票代碼');
+                if (!code) return;
+            }
+            code = code.toUpperCase();
+            const purchase = parseFloat(purchaseInput.value);
+            const shares = parseInt(sharesInput.value);
+            if (isNaN(purchase) || isNaN(shares)) return alert('完整填寫');
+
+            // 股息記錄條件：purchase<0 且 shares===0 視為股息；否則為正常交易
+            // 但我們不限制shares必須0，若使用者輸入負股數且負價格？這裡依需求：只有 purchase<0 且 shares==0 才當作股息
+            // 其他情況維持原邏輯
+            ensureCodeInSet(code);
+            const newStock = { code, purchasePrice: purchase, shares };
+            if (editingIndex === -1) {
+                stocks.push(newStock);
+            } else {
+                stocks[editingIndex] = newStock;
+            }
+
+            if (groupPriceMap[code] === undefined) groupPriceMap[code] = 0;
+            
+            saveLocal();
+            renderGroups();
+            updateGroupStatsAndPrice();
+            renderMobileList();
+            resetForm();
+            formContainer.classList.remove('expanded');
+            toggleIcon.classList.remove('rotated');
+            updateFooterSummary();
+        }
+
+        function calculateTotalFee() {
+            let totalFee = 0;
+            let hkCount = 0, usCount = 0;
+            stocks.forEach(s => {
+                if (getMarketFromCode(s.code) === 'US') {
+                    totalFee += FEE_US;
+                    usCount++;
+                } else {
+                    totalFee += FEE_HK;
+                    hkCount++;
+                }
+            });
+            return { totalFee, totalTxn: stocks.length, hkCount, usCount };
+        }
+
+        function updateFooterSummary() {
+            let totalCostHKD = 0;
+            let totalValueHKD = 0;
+            let totalDividendProfitHKD = 0; // 股息盈虧納入總盈虧
+            stocks.forEach(s => {
+                const isDiv = isDividendRecord(s);
+                const cost = isDiv ? 0 : s.purchasePrice * s.shares;
+                const val = isDiv ? 0 : (groupPriceMap[s.code] || 0) * s.shares;
+                const divProfit = isDiv ? profit(s) : 0; // profit 已處理股息為正收益
+                const market = getMarketFromCode(s.code);
+                const rate = market === 'US' ? USD_TO_HKD : 1;
+                totalCostHKD += cost * rate;
+                totalValueHKD += val * rate;
+                totalDividendProfitHKD += divProfit * rate; // 股息直接加入總盈虧
+            });
+            const totalProfitHKD = (totalValueHKD - totalCostHKD) + totalDividendProfitHKD;
+            footerTotalCost.innerText = '$' + totalCostHKD.toFixed(0);
+            footerTotalValue.innerText = '$' + totalValueHKD.toFixed(0);
+            footerTotalProfit.innerText = '$' + totalProfitHKD.toFixed(0);
+            
+            const fee = calculateTotalFee();
+            footerFeeInfo.innerText = `*不含手續費 ${fee.totalTxn}筆/約$${fee.totalFee}`;
+        }
+
+        function saveLocal() {
+            const data = {
+                stocks,
+                groupPriceMap,
+                availableCodes: Array.from(availableCodes)
+            };
+            localStorage.setItem('stockFinalWithDiv', JSON.stringify(data));
+        }
+
+        function loadLocal() {
+            const saved = localStorage.getItem('stockFinalWithDiv');
+            if (saved) {
+                try {
+                    const { stocks: s, groupPriceMap: g, availableCodes: ac } = JSON.parse(saved);
+                    stocks = s || [];
+                    groupPriceMap = g || {};
+                    availableCodes = new Set(ac || []);
+                } catch (e) {}
+            }
+            if (!stocks.length) {
+                stocks = [
+                    { code: '07226.HK', purchasePrice: 7.330, shares: 1900 },
+                    { code: '07226.HK', purchasePrice: 6.860, shares: 1500 },
+                    { code: '07226.HK', purchasePrice: 5.410, shares: 3000 },
+                    { code: '07226.HK', purchasePrice: 5.500, shares: 1600 },
+                    { code: 'AAPL', purchasePrice: 150, shares: 10 },   
+                    { code: 'TSLA', purchasePrice: 700, shares: 5 },
+                    { code: '07226.HK', purchasePrice: 8.200, shares: -500 }, // 賣出部分
+                    // 股息範例: 港股 派息 5元 (負數價格, 股數0)
+                    { code: '07226.HK', purchasePrice: -5.0, shares: 0 },
+                    // 美股股息範例
+                    { code: 'AAPL', purchasePrice: -0.82, shares: 0 }
+                ];
+                stocks.push({ code: 'BABA', purchasePrice: 180, shares: 100 });
+                stocks.push({ code: 'BABA', purchasePrice: 190, shares: -100 }); 
+                groupPriceMap = { '07226.HK': 4.240, 'AAPL': 155, 'TSLA': 750, 'BABA': 185 };
+                availableCodes = new Set(['07226.HK','AAPL','TSLA','BABA']);
+            }
+            stocks.forEach(s => availableCodes.add(s.code));
+            if (stocks.length) {
+                const firstCode = stocks[0].code;
+                currentMarket = getMarketFromCode(firstCode);
+                activeGroup = firstCode;
+            }
+            updateCodeSelect();
+            updateMarketButtons();
+            renderGroups();
+            updateGroupStatsAndPrice();
+            renderMobileList();
+            updateFooterSummary();
+        }
+
+        marketHKBtn.addEventListener('click', () => {
+            if (currentMarket === 'HK') return;
+            currentMarket = 'HK';
+            activeGroup = getCodesByCurrentMarket()[0] || null;
+            updateMarketButtons();
+            renderGroups();
+            updateGroupStatsAndPrice();
+            renderMobileList();
+        });
+        marketUSBtn.addEventListener('click', () => {
+            if (currentMarket === 'US') return;
+            currentMarket = 'US';
+            activeGroup = getCodesByCurrentMarket()[0] || null;
+            updateMarketButtons();
+            renderGroups();
+            updateGroupStatsAndPrice();
+            renderMobileList();
+        });
+        marketClosedBtn.addEventListener('click', () => {
+            if (currentMarket === 'CLOSED') return;
+            currentMarket = 'CLOSED';
+            activeGroup = getCodesByCurrentMarket()[0] || null;
+            updateMarketButtons();
+            renderGroups();
+            updateGroupStatsAndPrice();
+            renderMobileList();
+        });
+
+        formToggle.addEventListener('click', () => {
+            formContainer.classList.toggle('expanded');
+            toggleIcon.classList.toggle('rotated');
+        });
+        addBtn.addEventListener('click', addOrUpdate);
+        updateBtn.addEventListener('click', addOrUpdate);
+        cancelBtn.addEventListener('click', () => {
+            resetForm();
+            formContainer.classList.remove('expanded');
+            toggleIcon.classList.remove('rotated');
+        });
+
+document.getElementById('saveBtn').addEventListener('click', () => {
+    const data = {
+        stocks,
+        groupPriceMap,
+        availableCodes: Array.from(availableCodes)
+    };
+    
+    const jsonStr = JSON.stringify(data, null, 2);
+    const now = new Date();
+    const datetimeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+    
+    // 建立一個覆蓋全螢幕的 modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    `;
+    
+    const content = document.createElement('div');
+    content.style.cssText = `
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 95%;
+        max-width: 600px;
+        max-height: 90%;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+    `;
+    
+    // 顯示資料大小資訊
+    const sizeKB = Math.round(jsonStr.length / 1024 * 100) / 100;
+    
+    content.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h3 style="margin:0;">📋 導出資料</h3>
+            <span style="background:#e0e0e0; padding:2px 8px; border-radius:10px; font-size:12px;">${sizeKB} KB</span>
+        </div>
+        <p style="font-size:12px; color:#666; margin:0 0 10px 0;">
+            請複製以下 JSON 內容，貼到記事本另存為 ${datetimeStr}.json
+        </p>
+        <textarea id="exportJson" 
+            style="width:100%; min-height:250px; margin:10px 0; padding:12px; 
+                   font-family:monospace; font-size:12px; line-height:1.4; 
+                   border:1px solid #ccc; border-radius:5px; resize:vertical;"
+            readonly
+            onclick="this.select()"
+        >${jsonStr}</textarea>
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:10px;">
+            <button id="copyJsonBtn" style="background:#27ae60; color:white; border:none; padding:10px 20px; border-radius:5px; font-weight:600; flex:1;">📋 複製全部</button>
+            <button id="closeModalBtn" style="background:#95a5a6; color:white; border:none; padding:10px 20px; border-radius:5px; font-weight:600;">關閉</button>
+        </div>
+        <p style="font-size:11px; color:#999; margin:10px 0 0 0; text-align:center;">
+            💡 點一下文字框可全選，或用「複製全部」按鈕
+        </p>
+    `;
+    
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    
+    // 複製按鈕功能
+    document.getElementById('copyJsonBtn').addEventListener('click', () => {
+        const textarea = document.getElementById('exportJson');
+        textarea.select();
+        textarea.setSelectionRange(0, 999999);
+        
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                const btn = document.getElementById('copyJsonBtn');
+                btn.textContent = '✅ 已複製！';
+                btn.style.background = '#95a5a6';
+                setTimeout(() => {
+                    if (document.getElementById('copyJsonBtn')) {
+                        document.getElementById('copyJsonBtn').textContent = '📋 複製全部';
+                        document.getElementById('copyJsonBtn').style.background = '#27ae60';
+                    }
+                }, 2000);
+            } else {
+                alert('❌ 複製失敗，請手動選取文字後複製');
+            }
+        } catch (err) {
+            alert('❌ 複製失敗，請手動選取文字後複製');
+        }
+    });
+    
+    // 關閉按鈕
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+    
+    // 點擊背景也可以關閉
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
+});
+// 導入功能
+document.getElementById('loadBtn').addEventListener('click', () => document.getElementById('fileInput').click());
+
+document.getElementById('fileInput').addEventListener('change', (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const { stocks: s, groupPriceMap: g, availableCodes: ac } = JSON.parse(e.target.result);
+            stocks = s || [];
+            groupPriceMap = g || {};
+            availableCodes = new Set(ac || []);
+            stocks.forEach(s => availableCodes.add(s.code));
+        } catch (ex) {
+            alert('格式錯誤');
+        }
+        if (stocks.length) {
+            currentMarket = getMarketFromCode(stocks[0].code);
+            activeGroup = stocks[0].code;
+        }
+        updateCodeSelect();
+        updateMarketButtons();
+        renderGroups();
+        updateGroupStatsAndPrice();
+        renderMobileList();
+        updateFooterSummary();
+        saveLocal();
+    };
+    reader.readAsText(f);
+    e.target.value = ''; // 清空檔案選擇，讓下次可以選同一個檔案
+});
+        loadLocal();
+    })();
+</script>
+</body>
 </html>
