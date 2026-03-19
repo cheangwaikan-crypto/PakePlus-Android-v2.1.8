@@ -510,10 +510,11 @@
         font-size: 1.2rem;
     }
     .footer-fee {
-        font-size: 0.6rem;
+        font-size: 0.5rem;
         color: #ffd966;
         margin-left: 5px;
     }
+
     .footer-hk, .footer-us { color: #ffd966; }
     .footer-total { color: #ffffff; }
 
@@ -528,12 +529,12 @@
             <button id="marketUSBtn" class="market-pill" data-market="US">🇺🇸 美股</button>
             <button id="marketClosedBtn" class="market-pill closed-tab" data-market="CLOSED">📦 已清倉</button>
         </div>
-        <div class="header-buttons">
-            <button id="saveBtn">導出</button>
-            <button id="loadBtn">導入</button>
-            <input type="file" id="fileInput" accept=".json" style="display:none;">
-        </div>
-    </div>
+<div class="header-buttons">
+    <button id="saveBtn">導出</button>
+    <!-- 👇 加上这个新按钮 -->
+    <button id="pasteImportBtn" style="background:#f39c12; color:white;">導入</button>
+
+</div>
 
     <div class="group-bar" id="groupTabs"></div>
 
@@ -590,10 +591,21 @@
     </div>
 
     <!-- 底部總計：全部成本 / 持倉總金額 / 總虧損 + 手續費總筆數與總額 -->
-    <div class="footer-summary" id="footerSummary">
-        <div class="footer-item"><span class="footer-label">📉 全部成本 (港元)</span><span class="footer-value" id="footerTotalCost">$0</span></div>
-        <div class="footer-item"><span class="footer-label">💹 持倉總金額 (港元)</span><span class="footer-value" id="footerTotalValue">$0</span></div>
-        <div class="footer-item"><span class="footer-label">💰 總盈虧 (港元) </span><span class="footer-value" id="footerTotalProfit">$0</span><span class="footer-fee" id="footerFeeInfo">(手續費 0筆 / $0)</span></div>
+<div class="footer-summary" id="footerSummary">
+    <div class="footer-item">
+        <span class="footer-label">📉 全部成本 (港元)</span>
+        <span class="footer-value" id="footerTotalCost">$0</span>
+        <span class="footer-fee" style="opacity:0;">(0筆/$0)</span> <!-- 隱藏的空白備註 -->
+    </div>
+    <div class="footer-item">
+        <span class="footer-label">💹 持倉總金額 (港元)</span>
+        <span class="footer-value" id="footerTotalValue">$0</span>
+        <span class="footer-fee" style="opacity:0;">(0筆/$0)</span> <!-- 隱藏的空白備註 -->
+    </div>
+    <div class="footer-item">
+        <span class="footer-label">💰 總盈虧 (港元) </span>
+        <span class="footer-value" id="footerTotalProfit">$0</span>
+        <span class="footer-fee" id="footerFeeInfo">(手續費 0筆/$0)</span>
     </div>
 </div>
 
@@ -1020,7 +1032,7 @@
             footerTotalProfit.innerText = '$' + totalProfitHKD.toFixed(0);
             
             const fee = calculateTotalFee();
-            footerFeeInfo.innerText = `*不含手續費 ${fee.totalTxn}筆/約$${fee.totalFee}`;
+            footerFeeInfo.innerText = `*不含手續費${fee.totalTxn}筆/約$${fee.totalFee}`;
         }
 
         function saveLocal() {
@@ -1222,40 +1234,103 @@ document.getElementById('saveBtn').addEventListener('click', () => {
         }
     });
 });
-// 導入功能
-document.getElementById('loadBtn').addEventListener('click', () => document.getElementById('fileInput').click());
 
-document.getElementById('fileInput').addEventListener('change', (e) => {
-    const f = e.target.files[0];
-    if (!f) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
+
+
+// === 改良版：剪貼簿導入功能 (不使用 prompt) ===
+document.getElementById('pasteImportBtn').addEventListener('click', () => {
+    // 建立一個簡單的輸入視窗
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    `;
+    
+    const content = document.createElement('div');
+    content.style.cssText = `
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
+    `;
+    
+    content.innerHTML = `
+        <h3 style="margin-top:0; margin-bottom:15px;">📋 貼上導入</h3>
+        <p style="font-size:12px; color:#666; margin-bottom:10px;">請貼上你之前導出的JSON內容：</p>
+        <textarea id="pasteJsonInput" style="width:100%; min-height:200px; padding:10px; font-family:monospace; font-size:12px; border:1px solid #ccc; border-radius:5px; margin-bottom:15px;" placeholder="在這裡貼上JSON..."></textarea>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <button id="submitPasteBtn" style="background:#27ae60; color:white; border:none; padding:8px 16px; border-radius:5px;">確認導入</button>
+            <button id="closePasteBtn" style="background:#95a5a6; color:white; border:none; padding:8px 16px; border-radius:5px;">取消</button>
+        </div>
+    `;
+    
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    
+    // 確認按鈕
+    document.getElementById('submitPasteBtn').addEventListener('click', () => {
+        const jsonStr = document.getElementById('pasteJsonInput').value;
+        if (!jsonStr) {
+            alert('請貼上JSON內容');
+            return;
+        }
+        
         try {
-            const { stocks: s, groupPriceMap: g, availableCodes: ac } = JSON.parse(e.target.result);
-            stocks = s || [];
-            groupPriceMap = g || {};
-            availableCodes = new Set(ac || []);
+            const data = JSON.parse(jsonStr);
+
+            if (!data.stocks || !data.groupPriceMap || !data.availableCodes) {
+                alert('❌ 格式錯誤：貼上的內容不是有效的股票記錄備份');
+                return;
+            }
+
+            stocks = data.stocks || [];
+            groupPriceMap = data.groupPriceMap || {};
+            availableCodes = new Set(data.availableCodes || []);
             stocks.forEach(s => availableCodes.add(s.code));
-        } catch (ex) {
-            alert('格式錯誤');
+
+            if (stocks.length) {
+                currentMarket = getMarketFromCode(stocks[0].code);
+                activeGroup = stocks[0].code;
+            }
+            updateCodeSelect();
+            updateMarketButtons();
+            renderGroups();
+            updateGroupStatsAndPrice();
+            renderMobileList();
+            updateFooterSummary();
+            saveLocal();
+
+            alert(`✅ 導入成功！共 ${stocks.length} 筆記錄`);
+            document.body.removeChild(modal);
+        } catch (e) {
+            alert('❌ JSON格式錯誤：' + e.message);
         }
-        if (stocks.length) {
-            currentMarket = getMarketFromCode(stocks[0].code);
-            activeGroup = stocks[0].code;
+    });
+    
+    // 取消按鈕
+    document.getElementById('closePasteBtn').addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+    
+    // 點背景關閉
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
         }
-        updateCodeSelect();
-        updateMarketButtons();
-        renderGroups();
-        updateGroupStatsAndPrice();
-        renderMobileList();
-        updateFooterSummary();
-        saveLocal();
-    };
-    reader.readAsText(f);
-    e.target.value = ''; // 清空檔案選擇，讓下次可以選同一個檔案
+    });
 });
-        loadLocal();
-    })();
+
+loadLocal();
+})();
 </script>
 </body>
 </html>
