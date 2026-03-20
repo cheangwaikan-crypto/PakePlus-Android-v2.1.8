@@ -25,7 +25,7 @@
         --bg-panel: #f8f9fa;
         --bg-input: white;
         --bg-tab: white;
-        --bg-stats: #ffffff;;
+        --bg-stats: #ffffff;
         --bg-update-area: #f0f2f5;
         --shadow-sm: rgba(0,0,0,0.05);
         --footer-bg: transparent;
@@ -163,7 +163,7 @@
     }
     .market-pill {
         background: var(--bg-tab);
-        border: 1px solid var(--border-light);
+        border: 1px solid #DDDDDD;
         border-radius: 5px;
         padding: 4px 6px;
         font-weight: 600;
@@ -209,7 +209,7 @@
 
     .group-tab {
         background: var(--bg-tab);
-        border: 1px solid #d9e2ef;
+        border: 1px solid #999999;
         border-radius: 5px;
         padding: 2px 4px;
         font-weight: 500;
@@ -401,6 +401,10 @@
         display: block;
     }
 
+body.dark-mode .market-pill {
+    border-color: #555555;
+}
+
     input, select {
         width: 100%;
         padding: 8px 12px;
@@ -538,8 +542,17 @@
         text-align: center;
     }
 
-.edit-btn { background: #27ae60; color: white; }  /* 綠色 */
-.delete-btn { background: #e74c3c; color: white; }  /* 紅色 */
+.edit-btn { 
+    background: transparent;
+    color: white; 
+    border: 1px solid #27ae60;  /* 透明外框 */
+}
+
+.delete-btn { 
+    background: transparent;
+    color: white; 
+    border: 1px solid #e74c3c;  /* 透明外框 */
+}
 
     .edit-btn:hover { opacity: 0.85; }
     .delete-btn:hover { opacity: 0.85; }
@@ -639,7 +652,7 @@
     }
     body.dark-mode .footer-item .negative-num,
     body.dark-mode .negative-num {
-        color: #e67e22;
+        color: #e74c3c;
     }
     body.dark-mode .stat-value {
         color: #e0e0e0;
@@ -664,12 +677,12 @@ body.dark-mode .price-update-area {
         <div class="market-toggle-group" style="margin:0; padding:0;">
             <button id="marketHKBtn" class="market-pill active" data-market="HK">🇭🇰 港股</button>
             <button id="marketUSBtn" class="market-pill" data-market="US">🇺🇸 美股</button>
-            <button id="marketClosedBtn" class="market-pill closed-tab" data-market="CLOSED">📦 已清倉</button>
+            <button id="marketClosedBtn" class="market-pill closed-tab" data-market="CLOSED">📦</button>
         </div>
 <div class="header-buttons">
     <button id="themeToggleBtn" class="theme-toggle-btn" title="切換深色/日間模式">💡</button>
     <button id="saveBtn">導出</button>
-    <button id="pasteImportBtn" style="background:#f39c12; color:white;">導入</button>
+    <button id="pasteImportBtn" style="background:#f39c12; color:white;">載入</button>
 </div>
     </div>
 
@@ -719,7 +732,7 @@ body.dark-mode .price-update-area {
                 <div class="actions">
                     <button type="button" id="addBtn">✅ 加入</button>
                     <button type="button" id="updateBtn" style="display:none;">🔄 更新</button>
-                    <button type="button" id="cancelBtn" style="display:none;">✖️ 取消</button>
+                    <button type="button" id="cancelBtn" style="display:none;">❌ 取消</button>
                 </div>
             </form>
         </div>
@@ -1103,7 +1116,7 @@ function renderMobileList() {
                 card.style.background = 'rgba(231, 76, 60, 0.08)';
             }
             card.className = 'stock-card';
-            card.innerHTML = `<div class="grid-row"><div class="grid-cell index-cell"><div class="index-number" style="background:#e74c3c;">賣</div></div><div class="grid-cell"><div class="label-text">現價</div><div class="value-text">-</div></div><div class="grid-cell"><div class="label-text">升跌</div><div class="value-text">-</div></div><div class="grid-cell"><div class="label-text">盈虧</div><div class="value-text">-</div></div><div class="grid-cell"><button class="btn-inline edit-btn" data-index="${globalIndex}">✏️</button></div></div><div class="grid-row"><div class="grid-cell"><div class="label-text">賣出價</div><div class="value-text">$${s.purchasePrice.toFixed(2)}</div></div><div class="grid-cell"><div class="label-text">股數</div><div class="value-text">${s.shares}</div></div><div class="grid-cell"><div class="label-text">金額</div><div class="value-text">$${Math.abs(cost).toFixed(0)}</div></div><div class="grid-cell"><div class="label-text">市值</div><div class="value-text">-</div></div><div class="grid-cell"><button class="btn-inline delete-btn" data-index="${globalIndex}">✖️</button></div></div>`;
+            card.innerHTML = `<div class="grid-row"><div class="grid-cell index-cell"><div class="index-number" style="background:#e74c3c;">賣</div></div><div class="grid-cell"><div class="label-text">現價</div><div class="value-text">-</div></div><div class="grid-cell"><div class="label-text">升跌</div><div class="value-text">-</div></div><div class="grid-cell"><div class="label-text">盈虧</div><div class="value-text">-</div></div><div class="grid-cell"><button class="btn-inline edit-btn" data-index="${globalIndex}">✏️</button></div></div><div class="grid-row"><div class="grid-cell"><div class="label-text">賣出價</div><div class="value-text">$${s.purchasePrice.toFixed(2)}</div></div><div class="grid-cell"><div class="label-text">股數</div><div class="value-text">${s.shares}</div></div><div class="grid-cell"><div class="label-text">金額</div><div class="value-text">$${Math.abs(cost).toFixed(0)}</div></div><div class="grid-cell"><div class="label-text">市值</div><div class="value-text">-</div></div><div class="grid-cell"><button class="btn-inline delete-btn" data-index="${globalIndex}">❌</button></div></div>`;
         } 
         // 股息卡片
         else if (isDiv) {
@@ -1113,7 +1126,7 @@ function renderMobileList() {
                 card.style.background = 'rgba(46, 204, 113, 0.08)';
             }
             card.className = 'stock-card';
-            card.innerHTML = `<div class="grid-row"><div class="grid-cell index-cell"><div class="index-number" style="background:#27ae60;">息</div></div><div class="grid-cell"><div class="label-text">現價</div><div class="value-text">-</div></div><div class="grid-cell"><div class="label-text">升跌</div><div class="value-text">-</div></div><div class="grid-cell"><div class="label-text">盈虧</div><div class="value-text value-positive">+$${prof.toFixed(0)}</div></div><div class="grid-cell"><button class="btn-inline edit-btn" data-index="${globalIndex}">✏️</button></div></div><div class="grid-row"><div class="grid-cell"><div class="label-text">股息</div><div class="value-text">$${(-s.purchasePrice).toFixed(0)}</div></div><div class="grid-cell"><div class="label-text">股數</div><div class="value-text">-</div></div><div class="grid-cell"><div class="label-text">成本</div><div class="value-text">-</div></div><div class="grid-cell"><div class="label-text">市值</div><div class="value-text">-</div></div><div class="grid-cell"><button class="btn-inline delete-btn" data-index="${globalIndex}">✖️</button></div></div>`;
+            card.innerHTML = `<div class="grid-row"><div class="grid-cell index-cell"><div class="index-number" style="background:#27ae60;">息</div></div><div class="grid-cell"><div class="label-text">現價</div><div class="value-text">-</div></div><div class="grid-cell"><div class="label-text">升跌</div><div class="value-text">-</div></div><div class="grid-cell"><div class="label-text">盈虧</div><div class="value-text value-positive">+$${prof.toFixed(0)}</div></div><div class="grid-cell"><button class="btn-inline edit-btn" data-index="${globalIndex}">✏️</button></div></div><div class="grid-row"><div class="grid-cell"><div class="label-text">股息</div><div class="value-text">$${(-s.purchasePrice).toFixed(0)}</div></div><div class="grid-cell"><div class="label-text">股數</div><div class="value-text">-</div></div><div class="grid-cell"><div class="label-text">成本</div><div class="value-text">-</div></div><div class="grid-cell"><div class="label-text">市值</div><div class="value-text">-</div></div><div class="grid-cell"><button class="btn-inline delete-btn" data-index="${globalIndex}">❌</button></div></div>`;
         } 
         // 買入卡片
         else {
@@ -1122,7 +1135,7 @@ function renderMobileList() {
             const profitDisplay = prof >= 0 ? '+' + prof.toFixed(0) : prof.toFixed(0);
             const profitClass = prof > 0 ? 'value-positive' : (prof < 0 ? 'value-negative' : '');
             const pctDisplay = (profPct !== '') ? (profPct >= 0 ? '▲' + profPct + '%' : '▼' + Math.abs(profPct) + '%') : '-';
-            card.innerHTML = `<div class="grid-row"><div class="grid-cell index-cell"><div class="index-number">${buySequenceNumber || ''}</div></div><div class="grid-cell"><div class="label-text">現價</div><div class="value-text">$${curr.toFixed(2)}</div></div><div class="grid-cell"><div class="label-text">升跌</div><div class="value-text ${profPct>0?'value-positive':'value-negative'}">${pctDisplay}</div></div><div class="grid-cell"><div class="label-text">盈虧</div><div class="value-text ${profitClass}">$${profitDisplay}</div></div><div class="grid-cell"><button class="btn-inline edit-btn" data-index="${globalIndex}">✏️</button></div></div><div class="grid-row"><div class="grid-cell"><div class="label-text">入市價</div><div class="value-text">$${s.purchasePrice.toFixed(2)}</div></div><div class="grid-cell"><div class="label-text">股數</div><div class="value-text">${s.shares}</div></div><div class="grid-cell"><div class="label-text">成本</div><div class="value-text">$${Math.abs(cost).toFixed(0)}</div></div><div class="grid-cell"><div class="label-text">市值</div><div class="value-text">$${val.toFixed(0)}</div></div><div class="grid-cell"><button class="btn-inline delete-btn" data-index="${globalIndex}">✖️</button></div></div>`;
+            card.innerHTML = `<div class="grid-row"><div class="grid-cell index-cell"><div class="index-number">${buySequenceNumber || ''}</div></div><div class="grid-cell"><div class="label-text">現價</div><div class="value-text">$${curr.toFixed(2)}</div></div><div class="grid-cell"><div class="label-text">升跌</div><div class="value-text ${profPct>0?'value-positive':'value-negative'}">${pctDisplay}</div></div><div class="grid-cell"><div class="label-text">盈虧</div><div class="value-text ${profitClass}">$${profitDisplay}</div></div><div class="grid-cell"><button class="btn-inline edit-btn" data-index="${globalIndex}">✏️</button></div></div><div class="grid-row"><div class="grid-cell"><div class="label-text">入市價</div><div class="value-text">$${s.purchasePrice.toFixed(2)}</div></div><div class="grid-cell"><div class="label-text">股數</div><div class="value-text">${s.shares}</div></div><div class="grid-cell"><div class="label-text">成本</div><div class="value-text">$${Math.abs(cost).toFixed(0)}</div></div><div class="grid-cell"><div class="label-text">市值</div><div class="value-text">$${val.toFixed(0)}</div></div><div class="grid-cell"><button class="btn-inline delete-btn" data-index="${globalIndex}">❌</button></div></div>`;
         }
         mobileList.appendChild(card);
     });
@@ -1252,13 +1265,13 @@ function renderMobileList() {
         cancelBtn.addEventListener('click', () => { resetForm(); formContainer.classList.remove('expanded'); toggleIcon.classList.remove('rotated'); });
         
         // 導出功能 - 修復
-        document.getElementById('saveBtn').addEventListener('click', () => {
-            const data = { 
-                stocks: stocks, 
-                groupPriceMap: groupPriceMap, 
-                availableCodes: Array.from(availableCodes) 
-            };
-            const jsonStr = JSON.stringify(data, null, 2);
+document.getElementById('saveBtn').addEventListener('click', () => {
+    const data = { 
+        stocks: stocks, 
+        groupPriceMap: groupPriceMap, 
+        availableCodes: Array.from(availableCodes) 
+    };
+    const jsonStr = JSON.stringify(data);  // 去掉 null, 2，生成壓縮格式
             const modal = document.createElement('div'); 
             modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:10000;';
             const content = document.createElement('div'); 
@@ -1275,13 +1288,13 @@ function renderMobileList() {
             document.getElementById('closeModalBtn').addEventListener('click',()=>document.body.removeChild(modal));
         });
         
-        // 導入功能 - 修復，放寬格式驗證
+        // 載入功能 - 修復，放寬格式驗證
         document.getElementById('pasteImportBtn').addEventListener('click',()=>{
             const modal = document.createElement('div'); 
             modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:10000;';
             const content = document.createElement('div'); 
             content.style.cssText = 'background:var(--card-bg);color:var(--text-secondary);padding:20px;border-radius:10px;width:90%;max-width:500px;';
-            content.innerHTML = `<h3>📥 貼上導入</h3><textarea id="pasteJsonInput" style="width:100%;min-height:200px;font-family:monospace;background:var(--bg-input);color:var(--text-secondary);border:1px solid var(--border-light);" placeholder='貼上 JSON 資料...'></textarea><div style="display:flex;gap:10px;margin-top:10px;"><button id="submitPasteBtn" style="background:var(--btn-primary);">✅ 確認導入</button><button id="closePasteBtn" style="background:var(--btn-danger);">取消</button></div>`;
+            content.innerHTML = `<h3>📥 貼上資料</h3><textarea id="pasteJsonInput" style="width:100%;min-height:200px;font-family:monospace;background:var(--bg-input);color:var(--text-secondary);border:1px solid var(--border-light);" placeholder='貼上 JSON 資料...'></textarea><div style="display:flex;gap:10px;margin-top:10px;"><button id="submitPasteBtn" style="background:var(--btn-primary);">✅ 確認載入</button><button id="closePasteBtn" style="background:var(--btn-danger);">取消</button></div>`;
             modal.appendChild(content); 
             document.body.appendChild(modal);
             
@@ -1321,7 +1334,7 @@ function renderMobileList() {
                         updateFooterSummary();
                         saveLocal();
                         
-                        alert(`✅ 導入成功！共 ${stocks.length} 筆記錄`);
+                        alert(`✅ 載入成功！共 ${stocks.length} 筆記錄`);
                         document.body.removeChild(modal);
                     } else {
                         alert('❌ 格式錯誤：缺少 stocks 陣列');
